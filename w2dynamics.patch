@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index b72c069..6ccec60 100644
+index e8a819a..d45de97 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -52,15 +52,6 @@ SET( CMAKE_Fortran_FLAGS             "${CMAKE_Fortran_FLAGS} -DLAPACK77_Interfac
@@ -18,7 +18,7 @@ index b72c069..6ccec60 100644
  option(USE_NFFT "Compile with support for routines requiring the NFFT library for non-equispaced FFTs" ON)
  
  if (USE_NFFT)
-@@ -88,30 +79,14 @@ else ()
+@@ -91,22 +82,14 @@ else ()
    set(NFFT_LIBRARIES "")
  endif ()
  
@@ -27,14 +27,6 @@ index b72c069..6ccec60 100644
 -    install_via_pip("numpy>=1.10.0" ERRORCODE)
 -    if (${ERRORCODE})
 -    MESSAGE(FATAL_ERROR "Couldn't install numpy -> ABORTING!!!")
--    endif()
--    install_via_pip("setuptools" ERRORCODE)
--    if (${ERRORCODE})
--    MESSAGE(FATAL_ERROR "Couldn't install setuptools -> ABORTING!!!")
--    endif()
--    install_via_pip("meson" ERRORCODE)
--    if (${ERRORCODE})
--    MESSAGE(FATAL_ERROR "Couldn't install meson -> ABORTING!!!")
 -    endif()
 -ENDIF()
 -
@@ -49,21 +41,13 @@ index b72c069..6ccec60 100644
 -  COMMAND "${PYTHON_EXECUTABLE}" -c
 +  COMMAND "${Python_EXECUTABLE}" -c
            "import numpy.f2py; print(numpy.f2py.get_include())"
+   RESULT_VARIABLE GET_INCLUDE_FAILED
    OUTPUT_VARIABLE F2PY_INCLUDE_DIR
-   OUTPUT_STRIP_TRAILING_WHITESPACE)
-@@ -121,7 +96,7 @@ target_link_libraries(fortranobject PUBLIC Python::NumPy)
+@@ -124,42 +107,11 @@ target_link_libraries(fortranobject PUBLIC Python::NumPy)
  target_include_directories(fortranobject PUBLIC "${F2PY_INCLUDE_DIR}")
  set_property(TARGET fortranobject PROPERTY POSITION_INDEPENDENT_CODE ON)
  
 -find_package(H5PY)
-+find_package(H5PY REQUIRED)
- find_package(HDF5 1.6 COMPONENTS Fortran)# enforce the availability of the Fortran bindings. FIXME: Test on a suitable computer
- 
- if((NOT H5PY_FOUND) AND (NOT HDF5_FOUND))
-@@ -147,41 +122,9 @@ include(ExternalProject)
-     find_package(HDF5 1.6 COMPONENTS Fortran)
- endif()
- 
 -find_package(MPI4PY)
 -find_package(SCIPY 0.10)
 -IF(NOT SCIPY_FOUND)
@@ -99,21 +83,32 @@ index b72c069..6ccec60 100644
 -    MESSAGE(FATAL_ERROR "Couldn't install configobj(required for DMFT.py) -> ABORTING!!!")
 -    endif()
 -endif()
++find_package(H5PY REQUIRED)
++find_package(HDF5 1.6 COMPONENTS Fortran)# enforce the availability of the Fortran bindings. FIXME: Test on a suitable computer
 +find_package(MPI4PY REQUIRED)
 +find_package(SCIPY 0.10 REQUIRED)
 +find_package(CONFIGOBJ REQUIRED)
  
  # Define the executable name
  SET(CTQMCEXE ctqmc)
-@@ -226,7 +169,7 @@ message(STATUS "Installation prefix directory (variable CMAKE_INSTALL_PREFIX): $
- message(STATUS "Installing executables DMFT.py, cthyb, Maxent.py, hgrep (option INSTALL_EXECUTABLES): ${INSTALL_EXECUTABLES}")
+@@ -200,7 +152,7 @@ enable_testing()
+ message(STATUS "Configuration for installation (optional):")
+ 
+ # default / fallback paths relative to CMAKE_INSTALL_PREFIX
+-set(INSTALL_PATH_SITE_PACKAGES "lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages")
++set(INSTALL_PATH_SITE_PACKAGES "lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages")
+ set(INSTALL_PATH_SCRIPTS "bin")
+ 
+ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+@@ -246,7 +198,7 @@ option(INSTALL_EXECUTABLES "Install executable scripts DMFT.py, cthyb, Maxent.py
+ message(STATUS "Installing executable scripts DMFT.py, cthyb, Maxent.py, hgrep (option INSTALL_EXECUTABLES): ${INSTALL_EXECUTABLES}")
  
  install(DIRECTORY w2dyn
--  DESTINATION lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages
-+  DESTINATION lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages
+-  DESTINATION "${INSTALL_PATH_SITE_PACKAGES}"
++  DESTINATION ${INSTALL_PATH_SITE_PACKAGES}
    COMPONENT Python_Package)
  if(INSTALL_EXECUTABLES)
-   install(PROGRAMS DMFT.py cthyb hgrep Maxent.py
+   set(SCRIPT_FILES DMFT.py cthyb hgrep Maxent.py)
 diff --git a/cmake/Modules/FindCONFIGOBJ.cmake b/cmake/Modules/FindCONFIGOBJ.cmake
 index 4f4a9ee..59a81bc 100644
 --- a/cmake/Modules/FindCONFIGOBJ.cmake

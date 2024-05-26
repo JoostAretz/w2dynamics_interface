@@ -73,7 +73,7 @@ message(STATUS "-------- BUILD-TYPE: ${CMAKE_BUILD_TYPE} --------")
 
 # w2dynamics specific variables
 get_property(FFTW_LIBRARIES TARGET triqs::fftw PROPERTY INTERFACE_LINK_LIBRARIES)
-set(W2DYN_GIT_HASH b52a73f)
+set(W2DYN_GIT_HASH v1.1.5)
 message(STATUS "w2dynamics git hash: ${W2DYN_GIT_HASH}")
 
 include(FetchContent)
